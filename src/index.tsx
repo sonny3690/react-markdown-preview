@@ -1,11 +1,11 @@
-import React, { Component } from 'react';
-import Prism from 'prismjs';
-import 'prismjs/components/prism-markup';
-import ReactMarkdown, { ReactMarkdownProps } from 'react-markdown';
-import allowNode from './allowNode';
-import { loadLang } from './langs';
-import './styles/markdown.less';
-import './styles/markdowncolor.less';
+import React, { Component } from "react";
+import Prism from "prismjs";
+import "prismjs/components/prism-markup";
+import ReactMarkdown, { ReactMarkdownProps } from "react-markdown";
+import allowNode from "./allowNode";
+import { loadLang } from "./langs";
+import "./styles/markdown.scss";
+import "./styles/markdowncolor.scss";
 
 export type {
   ReactMarkdownProps,
@@ -18,9 +18,10 @@ export type {
   ReferenceType,
   LinkTargetResolver,
   Renderers,
-} from 'react-markdown';
+} from "react-markdown";
 
-export interface IMarkdownPreviewProps extends Omit<ReactMarkdownProps, 'className'> {
+export interface IMarkdownPreviewProps
+  extends Omit<ReactMarkdownProps, "className"> {
   prefixCls?: string;
   className?: string;
   style?: React.CSSProperties;
@@ -32,16 +33,19 @@ export interface IMarkdownPreviewState {
   value?: string;
 }
 
-export default class MarkdownPreview extends Component<IMarkdownPreviewProps, IMarkdownPreviewState> {
+export default class MarkdownPreview extends Component<
+  IMarkdownPreviewProps,
+  IMarkdownPreviewState
+> {
   public mdp = React.createRef<HTMLDivElement>();
-  public loadedLang: string[] = ['markup'];
+  public loadedLang: string[] = ["markup"];
   public static defaultProps: IMarkdownPreviewProps = {
     renderers: {},
-  }
+  };
   public constructor(props: IMarkdownPreviewProps) {
     super(props);
     this.state = {
-      value: '' || props.source,
+      value: "" || props.source,
     };
   }
   componentDidMount() {
@@ -61,27 +65,44 @@ export default class MarkdownPreview extends Component<IMarkdownPreviewProps, IM
   }
   public async highlight() {
     if (!this.mdp.current) return;
-    const codes = this.mdp.current.getElementsByTagName('code') as unknown as HTMLElement[];
+    const codes = (this.mdp.current.getElementsByTagName(
+      "code"
+    ) as unknown) as HTMLElement[];
     for (const value of codes) {
       const tag = value.parentNode as HTMLElement;
-      if (tag && tag.tagName === 'PRE' && /^language-/.test(value.className.trim())) {
-        const lang = value.className.trim().replace(/^language-/, '');
+      if (
+        tag &&
+        tag.tagName === "PRE" &&
+        /^language-/.test(value.className.trim())
+      ) {
+        const lang = value.className.trim().replace(/^language-/, "");
         try {
           if (!this.loadedLang.includes(lang as never)) {
             this.loadedLang.push(lang);
             await loadLang(lang);
           }
           await Prism.highlightElement(value);
-        } catch (error) { }
+        } catch (error) {}
       }
     }
   }
   render() {
     const { className, style, onScroll, onMouseOver, ...other } = this.props;
-    const cls = `wmde-markdown wmde-markdown-color ${className || ''}`;
+    const cls = `wmde-markdown wmde-markdown-color ${className || ""}`;
     return (
-      <div ref={this.mdp} onScroll={onScroll} style={style} onMouseOver={onMouseOver} className={cls} >
-        <ReactMarkdown escapeHtml={false} allowNode={allowNode} {...other} source={this.state.value} />
+      <div
+        ref={this.mdp}
+        onScroll={onScroll}
+        style={style}
+        onMouseOver={onMouseOver}
+        className={cls}
+      >
+        <ReactMarkdown
+          escapeHtml={false}
+          allowNode={allowNode}
+          {...other}
+          source={this.state.value}
+        />
       </div>
     );
   }
